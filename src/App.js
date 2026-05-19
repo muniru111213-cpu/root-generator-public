@@ -1,0 +1,158 @@
+import React, { useState } from "react";
+
+const App = () => {
+  // State管理
+  const [origin, setOrigin] = useState("");
+  const [destination, setDestination] = useState("");
+  const [waypoints, setWaypoints] = useState([]);
+
+  // Google Maps URL生成
+  const generateGoogleMapsUrl = () => {
+    const base = "https://www.google.com/maps/dir/?api=1";
+    const wp = waypoints.join("|");
+    return `${base}&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(
+      destination
+    )}&waypoints=${encodeURIComponent(wp)}`;
+  };
+
+  // Apple Maps URL生成
+  const generateAppleMapsUrl = () => {
+    const stops = [...waypoints, destination].join("+to:");
+    return `http://maps.apple.com/?saddr=${encodeURIComponent(origin)}&daddr=${encodeURIComponent(
+      stops
+    )}`;
+  };
+
+  // 寄り道追加
+  const addWaypoint = () => {
+    setWaypoints([...waypoints, ""]);
+  };
+
+  // 寄り道削除
+  const removeWaypoint = (index) => {
+    const updatedWaypoints = [...waypoints];
+    updatedWaypoints.splice(index, 1);
+    setWaypoints(updatedWaypoints);
+  };
+
+  // 入力変更時のハンドラー
+  const updateWaypoint = (index, value) => {
+    const updatedWaypoints = [...waypoints];
+    updatedWaypoints[index] = value;
+    setWaypoints(updatedWaypoints);
+  };
+
+  // 地図アプリ遷移用
+  const openUrl = (url) => {
+    window.location.href = url;
+  };
+
+  return (
+    <div style={{ padding: "16px", fontFamily: "Arial, sans-serif" }}>
+      <h1>寄り道ルート作成</h1>
+      <div>
+        <label>
+          出発地: <br />
+          <input
+            type="text"
+            value={origin}
+            onChange={(e) => setOrigin(e.target.value)}
+            placeholder="例: 東京駅"
+            style={{ width: "100%", marginBottom: "8px" }}
+          />
+        </label>
+      </div>
+      <div>
+        <label>
+          目的地: <br />
+          <input
+            type="text"
+            value={destination}
+            onChange={(e) => setDestination(e.target.value)}
+            placeholder="例: 新大阪駅"
+            style={{ width: "100%", marginBottom: "8px" }}
+          />
+        </label>
+      </div>
+      <div>
+        <label>
+          寄り道:
+          {waypoints.map((wp, index) => (
+            <div key={index} style={{ marginBottom: "8px" }}>
+              <input
+                type="text"
+                value={wp}
+                onChange={(e) => updateWaypoint(index, e.target.value)}
+                placeholder={`寄り道${index + 1}`}
+                style={{ width: "80%" }}
+              />
+              <button
+                onClick={() => removeWaypoint(index)}
+                style={{
+                  marginLeft: "8px",
+                  backgroundColor: "red",
+                  color: "white",
+                  border: "none",
+                  padding: "8px",
+                  cursor: "pointer"
+                }}
+              >
+                削除
+              </button>
+            </div>
+          ))}
+        </label>
+        <button
+          onClick={addWaypoint}
+          style={{
+            backgroundColor: "green",
+            color: "white",
+            border: "none",
+            padding: "8px",
+            cursor: "pointer"
+          }}
+        >
+          ＋寄り道追加
+        </button>
+      </div>
+      <button
+        onClick={() =>
+          origin && destination
+            ? openUrl(generateGoogleMapsUrl())
+            : alert("出発地と目的地を入力してください")
+        }
+        style={{
+          marginTop: "16px",
+          backgroundColor: "#4285F4",
+          color: "white",
+          border: "none",
+          padding: "12px",
+          cursor: "pointer",
+          width: "100%"
+        }}
+      >
+        Google Mapsで開く
+      </button>
+      <button
+        onClick={() =>
+          origin && destination
+            ? openUrl(generateAppleMapsUrl())
+            : alert("出発地と目的地を入力してください")
+        }
+        style={{
+          marginTop: "8px",
+          backgroundColor: "#000",
+          color: "white",
+          border: "none",
+          padding: "12px",
+          cursor: "pointer",
+          width: "100%"
+        }}
+      >
+        Apple Mapsで開く
+      </button>
+    </div>
+  );
+};
+
+export default App;
